@@ -246,3 +246,21 @@
     position: relative;
     left: -1px;
 }
+
+.grid_container {
+    display: grid;
+    grid-template-columns: 11fr 1fr;
+    grid-template-rows: 2.2fr 1fr;
+    gap: 2px 12px;
+    position: absolute;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.rating {grid-area: 1 / 1 / 2 / 2;}
+
+.pin_status {grid-area: 1 / 2 / 2 / 3;}
+
+.pin_selection {grid-area: 2 / 1 / 3 / 2;}
+
+.pin_category {grid-area: 2 / 2 / 2 / 3;}
