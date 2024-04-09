@@ -60,6 +60,7 @@ body .line {
 body .wrapper {
     display: flex;
     align-items: stretch;
+    position: relative;
 }
 
 #sidebar {
@@ -85,7 +86,7 @@ button#sidebarCollapses {
 }
 
 #tag_checkboxes_list .form-check-label {
-    width: -webkit-fill-available;
+    /*width: -webkit-fill-available*/;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -100,7 +101,7 @@ button#sidebarCollapses {
 }
 
 #url_radios_list .form-check-label {
-    width: -webkit-fill-available;
+    /*width: -webkit-fill-available*/;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -115,7 +116,7 @@ button#sidebarCollapses {
 }
 
 #domain_radios_list .form-check-label {
-    width: -webkit-fill-available;
+    /*width: -webkit-fill-available*/;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -461,6 +462,24 @@ container-fluid {
     box-shadow: inset 1px 0px 6px rgba(255, 255, 255, 1), inset 4px -2px -3px rgba(94, 104, 121, 1);
 }
 
+.urlRatingWrapper {
+    border: 1px solid red
+}
+
+.urlRatingWrapper {
+    border: 1px solid red
+}
+
+.urlRating.bi{
+    FONT-WEIGHT: 500;
+    position: absolute;
+    left: 9px;
+    top: -3px;
+    height: 5px;
+    width: auto;
+    font-size: 10px;
+    color: rgb(230, 230, 230, 0.5);
+}
 
 
 

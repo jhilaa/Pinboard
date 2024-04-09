@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const textInput = document.getElementById("text-input");
     const miniUrlInput = document.getElementById("mini-url-input");
     const tagCheckboxesContainer = document.getElementById("tag_checkboxes_container");
+    const urlCheckboxesContainer = document.getElementById("url_radios_container");
 
     function setCookie(cookieName, cookieValue) {
         const d = new Date();
@@ -484,6 +485,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             tagItemDiv.appendChild(tagItemInput);
             tagItemDiv.appendChild(tagItemLabel);
+
             tagItemDiv.classList.add("form-check");
             tagCheckboxesList.appendChild(tagItemDiv);
         }
@@ -549,7 +551,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             const urlItemLabel = document.createElement("label");
             urlItemInput.classList.add("form-check-input");
             urlItemInput.classList.add("form-check-input-url");
-            urlItemInput.type = "radio";
+            urlItemInput.type = "checkbox";
             urlItemInput.id = url;
             urlItemInput.name = "url";
             urlItemInput.value = url;
@@ -577,8 +579,14 @@ document.addEventListener("DOMContentLoaded", async function () {
             urlItemLabel.innerHTML = url;
             urlItemLabel.classList.add("form-check-label");
 
+            const urlRatingWrapper = document.createElement("div");
+            urlRatingWrapper.classList.add("urlRatingWrapper");
+            const urlRating = document.createElement("div");
+            urlRating.classList.add("urlRating","bi","bi-circle-fill");
+
             urlItemDiv.appendChild(urlItemInput);
             urlItemDiv.appendChild(urlItemLabel);
+            urlItemDiv.appendChild(urlRating);
             urlItemDiv.classList.add("form-check");
             urlRadiosList.appendChild(urlItemDiv);
         }
@@ -741,12 +749,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             miniUrlInput.addEventListener("change",
                 async () => {
                     await filterPins();
-                    /*
-                    countPinsByTag();
-                    countPinsByUrl();
-                    countPins();
-                    countPinsByGroup();
-                     */
                 }
             )
             // Get all checked checkboxes
@@ -756,11 +758,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                     //await filterPinsAnd();
                     await filterPins();
                 });
-            countPinsByTag();
-            countPinsByUrl();
-            countPins();
-            countPinsByGroup();
-            createModalSlides();
+            const visiblePins = document.querySelectorAll('.pin.display_block');
+            countPinsByTag(visiblePins);
+            countPinsByUrl(visiblePins);
+            countPins(visiblePins);
+            countPinsByGroup(visiblePins);
+            createModalSlides(visiblePins);
 
             textInput.addEventListener("change",
                 async () => {
@@ -858,7 +861,19 @@ document.addEventListener("DOMContentLoaded", async function () {
         return false;
     }
 
-    function checkInputMiniUrlText(pin) {
+    function checkPinUrlInSelectedUrls(pin) {
+        const pin_url = pin.getAttribute("mini_url")
+        const checkedCheckboxes = Array.from(document.querySelectorAll(".form-check-input-url[type=checkbox]:checked"));
+        const checkedCheckboxesUrl = checkedCheckboxes.map((e) => {return e.id});
+        if (checkedCheckboxesUrl == undefined || checkedCheckboxesUrl.length == 0) {
+            return true
+        }
+        else {
+            return (checkedCheckboxesUrl.includes(pin_url));
+        }
+    }
+
+    function checkInputMiniUrlFunnel(pin) {
         const miniUrlInputValue = miniUrlInput.value;
         if (miniUrlInputValue != "") {
             pin.querySelector(".funnel").classList.add("bi-funnel-fill");
@@ -903,36 +918,18 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    async function filterPins() {
-        // les fiches
-        const pins = Array.from(document.querySelectorAll(".pin:not(#pin_0)"));
-        // Parcours des éléments .pin et vérifiez s'ils correspondent aux critères sélectionnés
-        pins.forEach(function (pin) {
-            const ratingTest = checkPinRating(pin);
-            const tagsTest = checkPinTagsIdInSelectedTags(pin)
-            const inputTextTest = checkInputText(pin);
-            const inputMiniUrlTextTest = checkInputMiniUrlText(pin);
-            const groupsTest = checkPinGroupsIdInSelectedGroups(pin)
-            const selectedTest = checkPinSelected(pin)
-
-            if (ratingTest && tagsTest && inputTextTest && inputMiniUrlTextTest && groupsTest && selectedTest) {
-                pin.style.display = "block";
-            } else {
-                pin.style.display = "none";
-            }
-
-        });
-
-        //mise à jour du nombre de fiches sur les tags
-        await countPinsByTag()
-        await countPinsByUrl()
-        await countPins();
-        await countPinsByGroup();
-        await createModalSlides();
+    if (ratingTest && tagsTest && inputTextTest && groupsTest && selectedTest && selectedUrls) {
+        pin.classList.add("display_block");
+        pin.classList.remove("display_none");
+        //pin.style.display = "block";
+    } else {
+        pin.classList.add("display_none");
+        pin.classList.remove("display_block");
+        //pin.style.display = "none";
     }
 
-    function countPins() {
-        const visiblePins = document.querySelectorAll('.pin:not([style*="display: none"]):not(#pin_0)');
+    function countPins(visiblePins) {
+        //const visiblePins = document.querySelectorAll('.pin:not([style*="display: none"]):not(#pin_0)');
         const visiblePinsTagsArray = [...visiblePins];
 
         const starCountElement = document.getElementById("starCount");
@@ -1033,13 +1030,16 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    function countPinsByTag() {
+    function countPinsByTag(visiblePins) {
         //--
-        const visiblePinsTags = document.querySelectorAll('.pin:not([style*="display: none"]) .tag');
+        let visiblePinsTagsIds;
+        //const visiblePinsTags = document.querySelectorAll('.pin:not([style*="display: none"]) .tag');
+        visiblePins.forEach(pin => {
+        const visiblePinsTags = pin.querySelectorAll(".tag");
         const visiblePinsTagsArray = [...visiblePinsTags];
-        const visiblePinsTagsIds = visiblePinsTagsArray.map((tag) => {
+        visiblePinsTagsIds.concat(visiblePinsTagsArray.map((tag) => {
             return tag.id
-        });
+        }))});
 
         // pour les tags
         const visiblePinsTagsCount = visiblePinsTagsIds.reduce((acc, id) => {
@@ -1091,9 +1091,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     }
 
-    function countPinsByUrl() {
+    function countPinsByUrl(visiblePins) {
         //--
-        const visiblePins = document.querySelectorAll('.pin:not([style*="display: none"])');
+        //const visiblePins = document.querySelectorAll('.pin:not([style*="display: none"])');
         const visiblePinsArray = [...visiblePins];
         const visiblePinsUrls = visiblePinsArray.map((pin) => {
             return pin.getAttribute("mini_url");
