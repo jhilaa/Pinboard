@@ -95,12 +95,12 @@ button#sidebarCollapses {
     top: 0px;
 }
 
-#url_radios_list .form-check {
+#url_checkboxes_list .form-check {
     padding-left: 24px !important;
     max-height: 24px;
 }
 
-#url_radios_list .form-check-label {
+#url_checkboxes_list .form-check-label {
     /*width: -webkit-fill-available*/;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const textInput = document.getElementById("text-input");
     const miniUrlInput = document.getElementById("mini-url-input");
     const tagCheckboxesContainer = document.getElementById("tag_checkboxes_container");
-    const urlCheckboxesContainer = document.getElementById("url_radios_container");
+    const urlCheckboxesContainer = document.getElementById("url_checkboxes_container");
 
     function setCookie(cookieName, cookieValue) {
         const d = new Date();
@@ -758,6 +758,14 @@ document.addEventListener("DOMContentLoaded", async function () {
                     //await filterPinsAnd();
                     await filterPins();
                 });
+
+
+            urlCheckboxesContainer.addEventListener("change",
+                async () => {
+                    //await filterPinsAnd();
+                    await filterPins();
+                });
+
             const visiblePins = document.querySelectorAll('.pin.display_block');
             countPinsByTag(visiblePins);
             countPinsByUrl(visiblePins);

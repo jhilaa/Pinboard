@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const textInput = document.getElementById("text-input");
     const miniUrlInput = document.getElementById("mini-url-input");
     const tagCheckboxesContainer = document.getElementById("tag_checkboxes_container");
-    const urlCheckboxesContainer = document.getElementById("url_radios_container");
+    const urlCheckboxesContainer = document.getElementById("url_checkboxes_container");
 
     function setCookie(cookieName, cookieValue) {
         const d = new Date();
@@ -557,7 +557,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             return record.fields.url
         })
         const sortedUrls = new Set(urlArray.sort());
-        const urlCheckboxesList = document.getElementById("url_radios_list");
+        const urlCheckboxesList = document.getElementById("url_checkboxes_list");
         urlCheckboxesList.innerHTML = "";
 
         for (const url of sortedUrls) {
@@ -571,6 +571,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             urlItemInput.name = url;
             urlItemInput.value = url;
 
+            /********************
             urlItemInput.addEventListener('click', (e) => {
                 const urlCheckbox = e.target;
                 const urlInput = document.getElementById("mini-url-input");
@@ -588,6 +589,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 // Déclenchez l'événement sur l'élément input.
                 urlInput.dispatchEvent(event);
             });
+             ******************/
 
             urlItemLabel.setAttribute('for', url)
             urlItemLabel.setAttribute('name', url)
@@ -758,12 +760,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             miniUrlInput.addEventListener("change",
                 async () => {
                     await filterPins();
-                    /*
-                    countPinsByTag();
-                    countPinsByUrl();
-                    countPins();
-                    countPinsByGroup();
-                     */
                 }
             )
             // Get all checked checkboxes
@@ -779,13 +775,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                     //await filterPinsAnd();
                     await filterPins();
                 });
-            /*
-            countPinsByTag();
-            countPinsByUrl();
-            countPins();
-            countPinsByGroup();
-            createModalSlides();
-             */
 
             textInput.addEventListener("change",
                 async () => {
@@ -832,6 +821,16 @@ document.addEventListener("DOMContentLoaded", async function () {
         // que dans l'intersection entre les éléments choisis et les tags de la fiche
         // (la fiche doit contenir au moins tous les tag sélectionnés)
         return (tagsArraysIntersection.length == selectedTags.length);
+    }
+
+    function checkPinUrlIdInSelectedUrls(pin) {
+        const mini_url = pin.getAttribute("mini_url")
+        const checkedCheckboxes = Array.from(document.querySelectorAll(".form-check-input-url[type=checkbox]:checked"));
+        const checkedCheckboxesValues = checkedCheckboxes.map((e)=> {return e.value})
+        if (checkedCheckboxesValues.length == 0) {
+            return true
+        }
+        return (checkedCheckboxesValues.includes(mini_url));
     }
 
     function checkPinRating(pin) {
@@ -930,12 +929,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         pins.forEach(function (pin) {
             const ratingTest = checkPinRating(pin);
             const tagsTest = checkPinTagsIdInSelectedTags(pin)
+            const urlsTest = checkPinUrlIdInSelectedUrls(pin)
             const inputTextTest = checkInputText(pin);
             const inputMiniUrlTextTest = checkInputMiniUrlText(pin);
             const groupsTest = checkPinGroupsIdInSelectedGroups(pin)
             const selectedTest = checkPinSelected(pin)
 
-            if (ratingTest && tagsTest && inputTextTest && inputMiniUrlTextTest && groupsTest && selectedTest) {
+            if (ratingTest && tagsTest && urlsTest && inputTextTest && inputMiniUrlTextTest && groupsTest && selectedTest) {
                 //pin.style.display = "block";
                 pin.classList.add("display_block");
                 pin.classList.remove("display_none");
@@ -1117,14 +1117,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     function countPinsByUrl() {
         //--
-        const visiblePins = document.querySelectorAll('.pin.display_block');
-        const visiblePinsArray = [...visiblePins];
-        const visiblePinsUrls = visiblePinsArray.map((pin) => {
+        const allPins = document.querySelectorAll('.pin:not(#pin_0)');
+        const allPinsArray = [...allPins];
+        const allPinsUrls = allPinsArray.map((pin) => {
             return pin.getAttribute("mini_url");
         });
 
         // pour les urls
-        const visiblePinsUrlsCount = visiblePinsUrls.reduce((acc, url) => {
+        const allPinsUrlsCount = allPinsUrls.reduce((acc, url) => {
             //const id = objet.id;
             if (!acc[url]) {
                 acc[url] = 1; // Initialisez le compteur à 1 si c'est la première occurrence
@@ -1134,21 +1134,19 @@ document.addEventListener("DOMContentLoaded", async function () {
             return acc;
         }, {});
 
-        const visiblePinsCountByUrl = Object.entries(visiblePinsUrlsCount).map(([url, count]) => ({url, count}));
+        const allPinsCountByUrl = Object.entries(allPinsUrlsCount).map(([url, count]) => ({url, count}));
         //
-        const urlRadiosLabel = document.querySelectorAll("#url_radios_list .form-check-label");
-        const urlRadiosLabelArray = [...urlRadiosLabel];
-
-        urlRadiosLabelArray.forEach(radioLabel => {
-            const urlNbOccurences = visiblePinsCountByUrl.find(element => element.url === radioLabel.getAttribute("for"));
+        const urlCheckboxesLabel = document.querySelectorAll("#url_checkboxes_list .form-check-label");
+        const urlCheckboxesLabelArray = [...urlCheckboxesLabel];
+        urlCheckboxesLabelArray.forEach(checkboxLabel => {
+            const urlNbOccurences = allPinsCountByUrl.find(element => element.url === checkboxLabel.getAttribute("for"));
             if (urlNbOccurences == undefined) {
-                radioLabel.classList.add("urlCount0");
-                radioLabel.innerHTML = radioLabel.getAttribute("name");
+                checkboxLabel.classList.add("urlCount0");
+                checkboxLabel.innerHTML = checkboxLabel.getAttribute("name") ;
             } else {
-                radioLabel.classList.remove("urlCount0");
+                checkboxLabel.classList.remove("urlCount0");
                 //labelElement.textContent = labelElement.getAttribute("name") + " (" + tag.count + ")";
-                radioLabel.innerHTML = radioLabel.getAttribute("name") + "<span class=\"urlCount\"> (" + urlNbOccurences.count + ")</span>";
-
+                checkboxLabel.innerHTML = checkboxLabel.getAttribute("name") + "<span class=\"urlCount\"> (" + urlNbOccurences.count + ")</span>";
             }
         })
     }
