@@ -897,14 +897,14 @@ document.addEventListener("DOMContentLoaded", async function () {
             const urlRadiosLabelArray = [...urlRadiosLabel];
 
             urlRadiosLabelArray.forEach(radioLabel => {
-                const urlNbOccurences = visiblePinsCountByUrl.find(element => element.url === radioLabel.getAttribute("for"));
-                if (urlNbOccurences == undefined) {
+                const urlNbOccurrences = visiblePinsCountByUrl.find(element => element.url === radioLabel.getAttribute("for"));
+                if (urlNbOccurrences == undefined) {
                     radioLabel.classList.add("urlCount0");
                     radioLabel.innerHTML = radioLabel.getAttribute("name");
                 } else {
                     radioLabel.classList.remove("urlCount0");
                     //labelElement.textContent = labelElement.getAttribute("name") + " (" + tag.count + ")";
-                    radioLabel.innerHTML = radioLabel.getAttribute("name") + "<span class=\"urlCount\"> (" + urlNbOccurences.count + ")</span>";
+                    radioLabel.innerHTML = radioLabel.getAttribute("name") + "<span class=\"urlCount\"> (" + urlNbOccurrences.count + ")</span>";
 
                 }
             })

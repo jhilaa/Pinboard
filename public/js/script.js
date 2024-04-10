@@ -484,9 +484,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         tagCheckboxesList.innerHTML = "";
 
         for (const tag of sortedTags) {
-            const tagItemDiv = document.createElement("li");
             const tagItemInput = document.createElement("input");
-            const tagItemLabel = document.createElement("label");
             tagItemInput.classList.add("form-check-input");
             tagItemInput.classList.add("form-check-input-tag");
             tagItemInput.type = "checkbox";
@@ -494,11 +492,13 @@ document.addEventListener("DOMContentLoaded", async function () {
             tagItemInput.id = tag.id;
             tagItemInput.name = tag.fields.name;
 
+            const tagItemLabel = document.createElement("label");
             tagItemLabel.setAttribute('for', tag.id)
             //tagItemLabel.innerHTML = tag.fields.name;
             tagItemLabel.setAttribute('name', tag.fields.name);
             tagItemLabel.classList.add("form-check-label");
 
+            const tagItemDiv = document.createElement("li");
             tagItemDiv.appendChild(tagItemInput);
             tagItemDiv.appendChild(tagItemLabel);
             tagItemDiv.classList.add("form-check");
@@ -561,9 +561,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         urlCheckboxesList.innerHTML = "";
 
         for (const url of sortedUrls) {
-            const urlItemDiv = document.createElement("li");
             const urlItemInput = document.createElement("input");
-            const urlItemLabel = document.createElement("label");
             urlItemInput.classList.add("form-check-input");
             urlItemInput.classList.add("form-check-input-url");
             urlItemInput.type = "checkbox";
@@ -571,33 +569,23 @@ document.addEventListener("DOMContentLoaded", async function () {
             urlItemInput.name = url;
             urlItemInput.value = url;
 
-            /********************
-            urlItemInput.addEventListener('click', (e) => {
-                const urlCheckbox = e.target;
-                const urlInput = document.getElementById("mini-url-input");
-                if (urlCheckbox.value == urlInput.value) {
-                    urlCheckbox.checked = false
-                    urlInput.value = "";
-                } else {
-                    urlInput.value = urlCheckbox.value;
-                }
-
-                const event = new Event('change', {
-                    bubbles: true,  // Permet à l'événement de se propager (peut être utile dans certains cas).
-                    cancelable: true // Permet d'annuler l'événement si nécessaire.
-                });
-                // Déclenchez l'événement sur l'élément input.
-                urlInput.dispatchEvent(event);
-            });
-             ******************/
-
-            urlItemLabel.setAttribute('for', url)
-            urlItemLabel.setAttribute('name', url)
-            urlItemLabel.innerHTML = url;
+            const urlItemLabel = document.createElement("label");
+            urlItemLabel.setAttribute('for', url);
+            urlItemLabel.setAttribute('name', url);
             urlItemLabel.classList.add("form-check-label");
+            urlItemLabel.textContent = url;
 
+            const urlCount = document.createElement("span");
+            urlCount.classList.add("urlCount");
+
+            const urlItemFavorite = document.createElement("span");
+            urlItemFavorite.classList.add("url-favorite", "dot", "bi", "bi-dot");;
+
+            const urlItemDiv = document.createElement("li");
             urlItemDiv.appendChild(urlItemInput);
+            urlItemDiv.appendChild(urlItemFavorite);
             urlItemDiv.appendChild(urlItemLabel);
+            urlItemDiv.appendChild(urlCount);
             urlItemDiv.classList.add("form-check");
             urlCheckboxesList.appendChild(urlItemDiv);
         }
@@ -639,10 +627,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
                     //await filterPinsAnd();
                     await filterPins();
-                    //countPinsByTag();
-                    //countPinsByUrl();
-                    //countPins();
-                    //countPinsByGroup();
                 }
             });
 
@@ -697,10 +681,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                         await createPins(pinData);
                         await createModalSlides();
                         await filterPins();
-                        //countPinsByTag();
-                        //countPinsByUrl();
-                        //countPins();
-                        //countPinsByGroup();
                         console.log("Data loaded successfully.");
 
                     } catch (error) {
@@ -1136,17 +1116,22 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         const allPinsCountByUrl = Object.entries(allPinsUrlsCount).map(([url, count]) => ({url, count}));
         //
-        const urlCheckboxesLabel = document.querySelectorAll("#url_checkboxes_list .form-check-label");
-        const urlCheckboxesLabelArray = [...urlCheckboxesLabel];
-        urlCheckboxesLabelArray.forEach(checkboxLabel => {
-            const urlNbOccurences = allPinsCountByUrl.find(element => element.url === checkboxLabel.getAttribute("for"));
-            if (urlNbOccurences == undefined) {
-                checkboxLabel.classList.add("urlCount0");
-                checkboxLabel.innerHTML = checkboxLabel.getAttribute("name") ;
+        const urlCheckboxLi = document.querySelectorAll("#url_checkboxes_list li");
+        const urlCheckboxesLiArray = [...urlCheckboxLi];
+        urlCheckboxesLiArray.forEach(checkbox => {
+            const urlCheckboxLiLabel = checkbox.querySelector(".form-check-label")
+            const urlCheckboxLiLabelCount = checkbox.querySelector(".urlCount")
+            const urlNbOccurrences = allPinsCountByUrl.find(element => element.url === urlCheckboxLiLabel.getAttribute("for"));
+            if (urlNbOccurrences == undefined) {
+                urlCheckboxLiLabel.classList.add("urlCount0");
+                urlCheckboxLiLabelCount.textContent = "";
             } else {
-                checkboxLabel.classList.remove("urlCount0");
+                urlCheckboxLiLabel.classList.remove("urlCount0");
+                urlCheckboxLiLabelCount.textContent = "("+ urlNbOccurrences.count + ")";
                 //labelElement.textContent = labelElement.getAttribute("name") + " (" + tag.count + ")";
-                checkboxLabel.innerHTML = checkboxLabel.getAttribute("name") + "<span class=\"urlCount\"> (" + urlNbOccurences.count + ")</span>";
+                //checkboxLabel.innerHTML = checkboxLabel.getAttribute("name") + "<span class=\"urlCount\"> (" + urlNbOccurrences.count + ")</span>";
+                //urlCheckboxLiLabelCount.textContent = "(" + urlNbOccurrences.count + ")";
+
             }
         })
     }
@@ -1156,12 +1141,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     rating_operator.addEventListener("change",
         async () => {
             await filterPins();
-            /*
-            countPinsByTag();
-            countPinsByUrl();
-            countPins();
-            countPinsByGroup();
-             */
         })
 
     const filter_stars = document.querySelectorAll('#sidebar .star');

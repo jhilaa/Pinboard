@@ -98,10 +98,11 @@ button#sidebarCollapses {
 #url_checkboxes_list .form-check {
     padding-left: 24px !important;
     max-height: 24px;
+    display: flex;
 }
 
 #url_checkboxes_list .form-check-label {
-    /*width: -webkit-fill-available*/;
+    max-width: 90%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -479,6 +480,19 @@ container-fluid {
     width: auto;
     font-size: 10px;
     color: rgb(230, 230, 230, 0.5);
+}
+
+.url-favorite.dot{
+    position: relative;
+    top: -5px;
+    margin-right: 5px;
+}
+
+.url-favorite.star{
+    position: relative;
+    top: -9px;
+    margin-right: 5px;
+    /* color: gold; */
 }
 
 
