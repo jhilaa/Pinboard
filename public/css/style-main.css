@@ -86,7 +86,7 @@ button#sidebarCollapses {
 }
 
 #tag_checkboxes_list .form-check-label {
-    /*width: -webkit-fill-available*/;
+    max-width: 81%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -102,7 +102,7 @@ button#sidebarCollapses {
 }
 
 #url_checkboxes_list .form-check-label {
-    max-width: 90%;
+    max-width: 79%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -320,7 +320,10 @@ container-fluid {
 }
 
 .urlCount {
-    font-size: 65%
+    position: relative;
+    font-size: 65%;
+    top: 7px;
+    left: 2.5px;
 }
 
 #starCount {
@@ -482,17 +485,20 @@ container-fluid {
     color: rgb(230, 230, 230, 0.5);
 }
 
-.url-favorite.dot{
+.url-favorite.bi-dot{
     position: relative;
-    top: -5px;
-    margin-right: 5px;
+    top: -2px;
+    /* margin-right: 3px; */
+    left: -3px;
 }
 
-.url-favorite.star{
+.url-favorite.bi-star-fill{
     position: relative;
-    top: -9px;
-    margin-right: 5px;
-    /* color: gold; */
+    top: -0.027em;
+    margin-right: 1px;
+    color: gold;
+    left: -2.5px;
+    font-size: 0.95em;
 }
 
 
