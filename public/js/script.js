@@ -127,6 +127,30 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
+    async function updateUrlRating(id, rating) {
+        let postData = {
+            "fields": {
+                "rating": rating
+            }
+        }
+        try {
+            //const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins", {
+            const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Sites/" + id, {
+                method: 'PATCH',
+                headers: {
+                    "Authorization": " Bearer " + token,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(postData)
+            });
+            const responseData = await response.json()
+            console.log("-- responseData 3 ------------")
+            console.log(responseData)
+        } catch (error) {
+            console.error("Error making POST request:", error);
+        }
+    }
+
     function triggerDomainInputChangeEvent() {
         const event = new Event('change', {
             bubbles: true,  // Permet à l'événement de se propager (peut être utile dans certains cas).
@@ -554,7 +578,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     async function createUrlCheckboxes(urlData) {
         const urlArray = urlData.records.map((record) => {
-            return {url:record.fields.url, rating:record.fields.rating};
+            return {id: record.id, url: record.fields.url, rating: record.fields.rating};
         })
 
         function comparerUrl(a, b) {
@@ -562,6 +586,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (a.url > b.url) return 1;
             return 0;
         }
+
         const sortedUrls = new Set(urlArray.sort(comparerUrl));
         const urlCheckboxesList = document.getElementById("url_checkboxes_list");
         urlCheckboxesList.innerHTML = "";
@@ -571,7 +596,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             urlItemInput.classList.add("form-check-input");
             urlItemInput.classList.add("form-check-input-url");
             urlItemInput.type = "checkbox";
-            urlItemInput.id = url.url;
+            urlItemInput.id = url.id;
             urlItemInput.name = url.url;
             urlItemInput.value = url.url;
 
@@ -585,8 +610,19 @@ document.addEventListener("DOMContentLoaded", async function () {
             urlCount.classList.add("urlCount");
 
             const urlItemFavorite = document.createElement("span");
-            const urlItemFavoriteClass = (url.rating==1?"bi-star-fill":"bi-dot")
+            const urlItemFavoriteClass = (url.rating == 1 ? "bi-star-fill" : "bi-dot")
             urlItemFavorite.classList.add("url-favorite", "dot", "bi", urlItemFavoriteClass);
+            urlItemFavorite.id = url.id;
+            urlItemFavorite.setAttribute("rating", url.rating);
+            urlItemFavorite.addEventListener("click", (e) => {
+                console.log("test test ------------------")
+                console.log(e.target.classList)
+                const newRating = (e.target.getAttribute("rating")==1 ? 0 : 1);
+                e.target.setAttribute("rating", newRating)
+                toggleClass(e.target, "bi-star-fill", "bi-dot")
+                // updte en base
+                updateUrlRating(url.id, newRating)
+            })
 
             const urlItemDiv = document.createElement("li");
             urlItemDiv.appendChild(urlItemInput);
@@ -716,6 +752,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
+    function toggleClass(element, class1, class2) {
+        if (element.classList.contains(class1)) {
+            element.classList.remove(class1);
+            element.classList.add(class2);
+        } else if (element.classList.contains(class2)) {
+            element.classList.remove(class2);
+            element.classList.add(class1);
+        }
+
+    }
+
 
 //** INITIALISATION ************************
     //Promise.all([getPinData(), getTagData()])
@@ -813,7 +860,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     function checkPinUrlIdInSelectedUrls(pin) {
         const mini_url = pin.getAttribute("mini_url")
         const checkedCheckboxes = Array.from(document.querySelectorAll(".form-check-input-url[type=checkbox]:checked"));
-        const checkedCheckboxesValues = checkedCheckboxes.map((e)=> {return e.value})
+        const checkedCheckboxesValues = checkedCheckboxes.map((e) => {
+            return e.value
+        })
         if (checkedCheckboxesValues.length == 0) {
             return true
         }
@@ -893,18 +942,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     function checkPinSelected(pin) {
-        const pinSelectedCheckbox =  pin.querySelector(".pin_header .pin_selection .selection_input");
+        const pinSelectedCheckbox = pin.querySelector(".pin_header .pin_selection .selection_input");
         const filterSelectedCheckbox = document.querySelector(".checkbox_container.selected");
         if (filterSelectedCheckbox == undefined) {
             return true
-        }
-        else if (filterSelectedCheckbox.id == "checkbox_on") {
+        } else if (filterSelectedCheckbox.id == "checkbox_on") {
             return pinSelectedCheckbox.checked
-        }
-        else if (filterSelectedCheckbox.id == "checkbox_off") {
+        } else if (filterSelectedCheckbox.id == "checkbox_off") {
             return !pinSelectedCheckbox.checked
-        }
-        else {
+        } else {
             return true;
         }
     }
@@ -1134,7 +1180,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 urlCheckboxLiLabelCount.textContent = "";
             } else {
                 urlCheckboxLiLabel.classList.remove("urlCount0");
-                urlCheckboxLiLabelCount.textContent = "("+ urlNbOccurrences.count + ")";
+                urlCheckboxLiLabelCount.textContent = "(" + urlNbOccurrences.count + ")";
                 //labelElement.textContent = labelElement.getAttribute("name") + " (" + tag.count + ")";
                 //checkboxLabel.innerHTML = checkboxLabel.getAttribute("name") + "<span class=\"urlCount\"> (" + urlNbOccurrences.count + ")</span>";
                 //urlCheckboxLiLabelCount.textContent = "(" + urlNbOccurrences.count + ")";
@@ -1179,12 +1225,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
                 if (target_checkbox.classList.contains("selected")) {
                     target_checkbox.classList.remove("selected")
-                }
-                else if (target_checkbox_id == "checkbox_off") {
+                } else if (target_checkbox_id == "checkbox_off") {
                     target_checkbox.classList.add("selected");
                     checkbox_on.classList.remove("selected");
-                }
-                else if (target_checkbox_id == "checkbox_on") {
+                } else if (target_checkbox_id == "checkbox_on") {
                     target_checkbox.classList.add("selected");
                     checkbox_off.classList.remove("selected");
                 }
