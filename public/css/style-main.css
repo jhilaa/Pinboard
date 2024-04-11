@@ -501,6 +501,15 @@ container-fluid {
     font-size: 0.95em;
 }
 
+.url-favorite.bi-star-fill{
+    position: relative;
+    top: -0.027em;
+    margin-right: 1px;
+    color: gold;
+    left: -2.5px;
+    font-size: 0.95em;
+}
+
 
 
 

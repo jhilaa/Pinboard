@@ -554,9 +554,15 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     async function createUrlCheckboxes(urlData) {
         const urlArray = urlData.records.map((record) => {
-            return record.fields.url
+            return {url:record.fields.url, rating:record.fields.rating};
         })
-        const sortedUrls = new Set(urlArray.sort());
+
+        function comparerUrl(a, b) {
+            if (a.url < b.url) return -1;
+            if (a.url > b.url) return 1;
+            return 0;
+        }
+        const sortedUrls = new Set(urlArray.sort(comparerUrl));
         const urlCheckboxesList = document.getElementById("url_checkboxes_list");
         urlCheckboxesList.innerHTML = "";
 
@@ -565,21 +571,22 @@ document.addEventListener("DOMContentLoaded", async function () {
             urlItemInput.classList.add("form-check-input");
             urlItemInput.classList.add("form-check-input-url");
             urlItemInput.type = "checkbox";
-            urlItemInput.id = url;
-            urlItemInput.name = url;
-            urlItemInput.value = url;
+            urlItemInput.id = url.url;
+            urlItemInput.name = url.url;
+            urlItemInput.value = url.url;
 
             const urlItemLabel = document.createElement("label");
-            urlItemLabel.setAttribute('for', url);
-            urlItemLabel.setAttribute('name', url);
+            urlItemLabel.setAttribute('for', url.url);
+            urlItemLabel.setAttribute('name', url.url);
             urlItemLabel.classList.add("form-check-label");
-            urlItemLabel.textContent = url;
+            urlItemLabel.textContent = url.url;
 
             const urlCount = document.createElement("span");
             urlCount.classList.add("urlCount");
 
             const urlItemFavorite = document.createElement("span");
-            urlItemFavorite.classList.add("url-favorite", "dot", "bi", "bi-dot");;
+            const urlItemFavoriteClass = (url.rating==1?"bi-star-fill":"bi-dot")
+            urlItemFavorite.classList.add("url-favorite", "dot", "bi", urlItemFavoriteClass);
 
             const urlItemDiv = document.createElement("li");
             urlItemDiv.appendChild(urlItemInput);
