@@ -194,6 +194,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             clone.setAttribute("domain", record.fields.domain);
             clone.setAttribute("groups", record.fields.groups);
             clone.setAttribute("tags", record.fields.tags);
+            clone.setAttribute("site_rating", record.fields.site_rating);
             clone.querySelector(".selection_input").checked = record.fields.selected
 
 
@@ -255,6 +256,13 @@ document.addEventListener("DOMContentLoaded", async function () {
                 await updateSelected(pinElement.id, pin_selected.checked);
                 spinnerPinContainerElement.style.display = "none";
             })
+
+            const star = clone.querySelector(".globe .bi-star-fill");
+            if(record.fields.site_rating == undefined || record.fields.site_rating != 1) {
+                star.classList.add("display_none");
+            } else {
+                star.classList.remove("display_none");
+            }
 
 
             const globe = clone.querySelector(".bi-globe");
@@ -578,7 +586,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     async function createUrlCheckboxes(urlData) {
         const urlArray = urlData.records.map((record) => {
-            return {id: record.id, url: record.fields.url, rating: record.fields.rating};
+            return {id: record.id, url: record.fields.url, rating: record.fields.site_rating};
         })
 
         function comparerUrl(a, b) {
@@ -861,7 +869,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const mini_url = pin.getAttribute("mini_url")
         const checkedCheckboxes = Array.from(document.querySelectorAll(".form-check-input-url[type=checkbox]:checked"));
         const checkedCheckboxesValues = checkedCheckboxes.map((e) => {
-            return e.value
+            return e.id
         })
         if (checkedCheckboxesValues.length == 0) {
             return true
@@ -1174,7 +1182,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         urlCheckboxesLiArray.forEach(checkbox => {
             const urlCheckboxLiLabel = checkbox.querySelector(".form-check-label")
             const urlCheckboxLiLabelCount = checkbox.querySelector(".urlCount")
-            const urlNbOccurrences = allPinsCountByUrl.find(element => element.url === urlCheckboxLiLabel.getAttribute("for"));
+            const urlId = checkbox.querySelector(".form-check-input-url").id;
+            //const urlNbOccurrences = allPinsCountByUrl.find(element => element.url === urlCheckboxLiLabel.getAttribute("for"));
+            const urlNbOccurrences = allPinsCountByUrl.find(element => element.url === urlId);
             if (urlNbOccurrences == undefined) {
                 urlCheckboxLiLabel.classList.add("urlCount0");
                 urlCheckboxLiLabelCount.textContent = "";
