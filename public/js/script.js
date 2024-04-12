@@ -1237,5 +1237,35 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         }
     )
+
+    function filterUrls(filterIsActive) {
+        const urlStatusFilter = document.querySelector("#url_status_filter")
+        const urlCheckboxes = document.querySelectorAll(".url-favorite")
+        urlCheckboxes.forEach(item => {
+            const parent = item.closest(".form-check");
+            if (urlStatusFilter.classList.contains("not_selected")) {
+                parent.classList.remove("display_none");
+            }
+            else {
+                if (item.classList.contains("bi-dot")) {
+                    parent.classList.add("display_none")
+                } else {
+                    parent.classList.remove("display_none");
+                }
+            }
+        })
+    }
+
+    const urlStatusFilter = document.getElementById("url_status_filter");
+    const star = document.querySelector("#url_status_filter .bi");
+    urlStatusFilter.addEventListener("click", async (e)=> {
+        let filterIsActive = e.currentTarget.classList.contains("selected");
+        await toggleClass(e.currentTarget,"not_selected", "selected")
+        await toggleClass(star, "bi-star-fill", "bi-star")
+        await filterUrls(filterIsActive) ;
+        await filterPins();
+    })
+
+
 })
 ;

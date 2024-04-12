@@ -72,7 +72,7 @@
 
         <ul class="list-unstyled components">
             <div id="domain_radios_container">
-                <a href="#domain_radios_list" id="domain_link_toggle" data-toggle="collapse" aria-expanded="false"
+                <a href="#domain_radios_list" id="domain_link_toggle " data-toggle="collapse" aria-expanded="true"
                    class="dropdown-toggle">Domaine</a>
                 <!---------------->
                 <ul id="domain_radios_list" class="collapse  list-unstyled"></ul>
@@ -137,21 +137,26 @@
 
 
         <ul class="list-unstyled components">
+            <div id="url_checkboxes_container">
+                <div class="url_checkboxes_container_header">
+                    <a href="#url_checkboxes_list" data-toggle="collapse" aria-expanded="false"
+                       class="dropdown-toggle">Url</a>
+                    <div id="url_status_filter" class="checkbox_container not_selected">
+                        <span class="bi bi-star"></span>
+                    </div>
+                </div>
+                <!-- <ul id="url_checkboxes_list" class="collapse show list-unstyled"></ul>-->
+                <ul id="url_checkboxes_list" class="collapse list-unstyled"></ul>
+            </div>
+        </ul>
+
+        <ul class="list-unstyled components">
             <div id="tag_checkboxes_container">
                 <a href="#tag_checkboxes_list" data-toggle="collapse" aria-expanded="false"
                    class="dropdown-toggle">Tags</a>
                 <!-- <ul id="tag_checkboxes_list" class="collapse show list-unstyled">-->
                 <ul id="tag_checkboxes_list" class="collapse list-unstyled">
                 </ul>
-            </div>
-        </ul>
-
-        <ul class="list-unstyled components">
-            <div id="url_checkboxes_container">
-                <a href="#url_checkboxes_list" data-toggle="collapse" aria-expanded="false"
-                   class="dropdown-toggle">Url</a>
-                <!-- <ul id="url_checkboxes_list" class="collapse show list-unstyled"></ul>-->
-                <ul id="url_checkboxes_list" class="collapse list-unstyled"></ul>
             </div>
         </ul>
     </nav>
@@ -176,7 +181,7 @@
 
             </div>
         </nav>
-        <div class="pin display_none" id="pin_0" rating="0" status="0" mini_url="" >
+        <div class="pin display_none" id="pin_0" rating="0" status="0" mini_url="">
             <div class="spinnerPinContainer" style="display:none">
                 <div class="spinner-border text-secondary" role="status">
                     <span class="sr-only"></span>
