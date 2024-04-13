@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const ratingOperatorInput = document.getElementById("rating-operator");
     const ratingValueInput = document.querySelector("#sidebar .rating");
     const textInput = document.getElementById("text-input");
-    const miniUrlInput = document.getElementById("mini-url-input");
+    const siteInput = document.getElementById("site-input");
     const tagCheckboxesContainer = document.getElementById("tag_checkboxes_container");
     const urlCheckboxesContainer = document.getElementById("url_checkboxes_container");
 
@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             clone.querySelector(".pin_header img").src = record.fields.img_url;
             clone.setAttribute("rating", record.fields.rating);
             clone.setAttribute("status", record.fields.status);
-            clone.setAttribute("mini_url", record.fields.mini_url);
+            clone.setAttribute("site", record.fields.site);
             clone.setAttribute("domain", record.fields.domain);
             clone.setAttribute("groups", record.fields.groups);
             clone.setAttribute("tags", record.fields.tags);
@@ -268,12 +268,12 @@ document.addEventListener("DOMContentLoaded", async function () {
             const globe = clone.querySelector(".bi-globe");
             globe.addEventListener("click", (e) => {
                 const pinElement = e.target.closest(".pin");
-                const mini_url_attribute = pinElement.getAttribute("mini_url");
+                const site_attribute = pinElement.getAttribute("site");
 
-                if (miniUrlInput.value == mini_url_attribute) {
-                    miniUrlInput.value = "";
+                if (siteInput.value == site_attribute) {
+                    siteInput.value = "";
                 } else {
-                    miniUrlInput.value = mini_url_attribute;
+                    siteInput.value = site_attribute;
                 }
                 /******************/
                 const event = new Event('change', {
@@ -281,7 +281,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     cancelable: true // Permet d'annuler l'événement si nécessaire.
                 });
                 // Déclenchez l'événement sur l'élément input.
-                miniUrlInput.dispatchEvent(event);
+                siteInput.dispatchEvent(event);
             })
 
 
@@ -799,7 +799,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 }
             )
             // événement sur le changement du filtre sur l'url
-            miniUrlInput.addEventListener("change",
+            siteInput.addEventListener("change",
                 async () => {
                     await filterPins();
                 }
@@ -866,7 +866,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     function checkPinUrlIdInSelectedUrls(pin) {
-        const mini_url = pin.getAttribute("mini_url")
+        const site = pin.getAttribute("site")
         const checkedCheckboxes = Array.from(document.querySelectorAll(".form-check-input-url[type=checkbox]:checked"));
         const checkedCheckboxesValues = checkedCheckboxes.map((e) => {
             return e.id
@@ -874,7 +874,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (checkedCheckboxesValues.length == 0) {
             return true
         }
-        return (checkedCheckboxesValues.includes(mini_url));
+        return (checkedCheckboxesValues.includes(site));
     }
 
     function checkPinRating(pin) {
@@ -921,16 +921,16 @@ document.addEventListener("DOMContentLoaded", async function () {
         return false;
     }
 
-    function checkInputMiniUrlText(pin) {
-        const miniUrlInputValue = miniUrlInput.value;
-        if (miniUrlInputValue != "") {
+    function checkInputSiteText(pin) {
+        const siteInputValue = siteInput.value;
+        if (siteInputValue != "") {
             pin.querySelector(".funnel").classList.add("bi-funnel-fill");
             pin.querySelector(".funnel").classList.remove("bi-funnel");
         } else {
             pin.querySelector(".funnel").classList.remove("bi-funnel-fill");
             pin.querySelector(".funnel").classList.add("bi-funnel");
         }
-        return (miniUrlInputValue == "" || pin.getAttribute("mini_url") == miniUrlInputValue)
+        return (siteInputValue == "" || pin.getAttribute("site") == siteInputValue)
     }
 
     //TODO gérer le multi select (cf tags)
@@ -972,11 +972,11 @@ document.addEventListener("DOMContentLoaded", async function () {
             const tagsTest = checkPinTagsIdInSelectedTags(pin)
             const urlsTest = checkPinUrlIdInSelectedUrls(pin)
             const inputTextTest = checkInputText(pin);
-            const inputMiniUrlTextTest = checkInputMiniUrlText(pin);
+            const inputSiteTextTest = checkInputSiteText(pin);
             const groupsTest = checkPinGroupsIdInSelectedGroups(pin)
             const selectedTest = checkPinSelected(pin)
 
-            if (ratingTest && tagsTest && urlsTest && inputTextTest && inputMiniUrlTextTest && groupsTest && selectedTest) {
+            if (ratingTest && tagsTest && urlsTest && inputTextTest && inputSiteTextTest && groupsTest && selectedTest) {
                 //pin.style.display = "block";
                 pin.classList.add("display_block");
                 pin.classList.remove("display_none");
@@ -1161,7 +1161,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const allPins = document.querySelectorAll('.pin:not(#pin_0)');
         const allPinsArray = [...allPins];
         const allPinsUrls = allPinsArray.map((pin) => {
-            return pin.getAttribute("mini_url");
+            return pin.getAttribute("site");
         });
 
         // pour les urls
