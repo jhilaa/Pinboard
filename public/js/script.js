@@ -586,7 +586,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     async function createUrlCheckboxes(urlData) {
         const urlArray = urlData.records.map((record) => {
-            return {id: record.id, url: record.fields.url, rating: record.fields.site_rating};
+            return {id: record.id, url: record.fields.site, rating: record.fields.site_rating};
         })
 
         function comparerUrl(a, b) {
@@ -865,7 +865,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         return (tagsArraysIntersection.length == selectedTags.length);
     }
 
-    function checkPinUrlIdInSelectedUrls(pin) {
+    function 555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555checkPinUrlIdInSelectedUrls(pin) {
         const site = pin.getAttribute("site")
         const checkedCheckboxes = Array.from(document.querySelectorAll(".form-check-input-url[type=checkbox]:checked"));
         const checkedCheckboxesValues = checkedCheckboxes.map((e) => {
