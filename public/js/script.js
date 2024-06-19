@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     //** click sur les étoiles
-    async function updateRating(id, rating) {
+    async function updateRating(pinId, rating) {
         let method = "PATCH";
         let postData = {
             "fields": {
@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
         try {
             //const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins", {
-            const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + id, {
+            const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + pinId, {
                 method: method,
                 headers: {
                     "Authorization": " Bearer " + token,
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    async function updateStatus(id, status) {
+    async function updateStatus(pinId, status) {
         let method = "PATCH";
         let postData = {
             "fields": {
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
         try {
             //const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins", {
-            const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + id, {
+            const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + pinId, {
                 method: method,
                 headers: {
                     "Authorization": " Bearer " + token,
@@ -99,9 +99,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    async function updateSelected(id, selected) {
+    async function updateSelected(pinId, selected) {
         console.log("selected ---------------");
-        console.log(id);
+        console.log(pinId);
         console.log(selected);
         let method = "PATCH";
         let postData = {
@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
         try {
             //const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins", {
-            const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + id, {
+            const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + pinId, {
                 method: method,
                 headers: {
                     "Authorization": " Bearer " + token,
@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    async function updateUrlRating(id, rating) {
+    async function updateSiteRating(siteId, rating) {
         let postData = {
             "fields": {
                 "rating": rating
@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
         try {
             //const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins", {
-            const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Sites/" + id, {
+            const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Sites/" + siteId, {
                 method: 'PATCH',
                 headers: {
                     "Authorization": " Bearer " + token,
@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 pinTagsData = record.fields.tags_name.map((tag_name, index) => ({
                     tag_name: tag_name.replace(" ", "&nbsp;"),
                     tag_color: record.fields.tags_color[index],
-                    tag_id: record.fields.tags[index]
+                    tag_id: record.fields.tags_id[index]
                 }));
             }
             if (record.fields.groups_name != undefined && record.fields.groups_name.length > 0) {
@@ -190,10 +190,10 @@ document.addEventListener("DOMContentLoaded", async function () {
             clone.querySelector(".pin_header img").src = record.fields.img_url;
             clone.setAttribute("rating", record.fields.rating);
             clone.setAttribute("status", record.fields.status);
-            clone.setAttribute("site", record.fields.site);
-            clone.setAttribute("domain", record.fields.domain);
-            clone.setAttribute("groups", record.fields.groups);
-            clone.setAttribute("tags", record.fields.tags);
+            clone.setAttribute("site_id", record.fields.site_id);
+            clone.setAttribute("domain_id", record.fields.domain_id);
+            clone.setAttribute("groups_id", record.fields.groups_id);
+            clone.setAttribute("tags_id", record.fields.tags_id);
             clone.setAttribute("site_rating", record.fields.site_rating);
             clone.querySelector(".selection_input").checked = record.fields.selected
 
@@ -268,7 +268,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             const globe = clone.querySelector(".bi-globe");
             globe.addEventListener("click", (e) => {
                 const pinElement = e.target.closest(".pin");
-                const site_attribute = pinElement.getAttribute("site");
+                const site_attribute = pinElement.getAttribute("site_id");
 
                 if (siteInput.value == site_attribute) {
                     siteInput.value = "";
@@ -540,9 +540,16 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     async function createDomainRadios(domainData, domain) {
         const domainArray = domainData.records.map((record) => {
-            return record.fields.name
+            return {domain_id:record.id, domain:record.fields.name}
         })
-        const sortedDomains = new Set(domainArray.sort());
+        const sortedDomains = new Set(domainArray.sort((a, b) => {
+            const nameA = a.domain.toLowerCase();
+            const nameB = b.domain.toLowerCase();
+
+            if (nameA < nameB) return -1;
+            if (nameA > nameB) return 1;
+            return 0;
+        }));
 
         for (const domain of sortedDomains) {
             const domainItemDiv = document.createElement("div");
@@ -551,12 +558,12 @@ document.addEventListener("DOMContentLoaded", async function () {
             domainItemInput.classList.add("form-check-input");
             domainItemInput.classList.add("form-check-input-domain");
             domainItemInput.type = "radio";
-            domainItemInput.id = domain;
+            domainItemInput.id = domain.domain_id;
             domainItemInput.name = "domain";
-            domainItemInput.value = domain;
+            domainItemInput.value = domain.domain;
             if (domain == domainCookie) {
                 domainItemInput.checked = true;
-                domainInput.value = domain;
+                domainInput.value = domain.domain;
             }
 
             domainItemInput.addEventListener('click', (e) => {
@@ -572,9 +579,9 @@ document.addEventListener("DOMContentLoaded", async function () {
                 }
             });
 
-            domainItemLabel.setAttribute('for', domain)
-            domainItemLabel.setAttribute('name', domain)
-            domainItemLabel.innerHTML = domain;
+            domainItemLabel.setAttribute('for', domain.domain)
+            domainItemLabel.setAttribute('name', domain.domain)
+            domainItemLabel.innerHTML = domain.domain;
             domainItemLabel.classList.add("form-check-label");
 
             domainItemDiv.appendChild(domainItemInput);
@@ -629,7 +636,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 e.target.setAttribute("rating", newRating)
                 toggleClass(e.target, "bi-star-fill", "bi-dot")
                 // updte en base
-                updateUrlRating(url.id, newRating)
+                updateSiteRating(url.id, newRating)
             })
 
             const urlItemDiv = document.createElement("li");
@@ -730,7 +737,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                         await createGroupTree(groupData)
                         // Create pin and modal
                         await createPins(pinData);
-                        await createModalSlides();
+                        // await createModalSlides();
                         await filterPins();
                         console.log("Data loaded successfully.");
 
@@ -865,7 +872,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         return (tagsArraysIntersection.length == selectedTags.length);
     }
 
-    function 555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555checkPinUrlIdInSelectedUrls(pin) {
+    function checkPinUrlIdInSelectedUrls(pin) {
         const site = pin.getAttribute("site")
         const checkedCheckboxes = Array.from(document.querySelectorAll(".form-check-input-url[type=checkbox]:checked"));
         const checkedCheckboxesValues = checkedCheckboxes.map((e) => {
@@ -993,7 +1000,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         await countPinsByUrl()
         await countPins();
         await countPinsByGroup();
-        await createModalSlides();
+        // await createModalSlides();
     }
 
     function countPins() {
