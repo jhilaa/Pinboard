@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     spinnerContainer.style.display = "block";
 
     const domainRadiosList = document.getElementById("domain_radios_list");
-    const domainInput = document.getElementById("domain-input");
+    //const domainInput = document.getElementById("domain-input");
     const domainLinkToggle = document.getElementById('domain_link_toggle');
     const groupCheckboxesList = document.getElementById("group_checkboxes_list");
     const pinContainer = document.getElementById("pin_container");
@@ -151,6 +151,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
+    /*
     function triggerDomainInputChangeEvent() {
         const event = new Event('change', {
             bubbles: true,  // Permet à l'événement de se propager (peut être utile dans certains cas).
@@ -159,7 +160,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         // Déclenchez l'événement sur l'élément input.
         domainInput.dispatchEvent(event);
 
-    }
+    }*/
+
 
     //** Création des tuiles
     function createPins(pinData) {
@@ -553,30 +555,25 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         for (const domain of sortedDomains) {
             const domainItemDiv = document.createElement("div");
-            const domainItemInput = document.createElement("input");
+            const domainItemCheckbox = document.createElement("input");
             const domainItemLabel = document.createElement("label");
-            domainItemInput.classList.add("form-check-input");
-            domainItemInput.classList.add("form-check-input-domain");
-            domainItemInput.type = "radio";
-            domainItemInput.id = domain.domain_id;
-            domainItemInput.name = "domain";
-            domainItemInput.value = domain.domain;
+            domainItemCheckbox.classList.add("form-check-input");
+            domainItemCheckbox.classList.add("form-check-input-domain");
+            domainItemCheckbox.type = "radio";
+            domainItemCheckbox.id = domain.domain_id;
+            domainItemCheckbox.name = "domain";
+            domainItemCheckbox.value = domain.domain;
             if (domain == domainCookie) {
-                domainItemInput.checked = true;
-                domainInput.value = domain.domain;
+                domainItemCheckbox.checked = true;
             }
+            handleDomainChoice(undefined);
 
-            domainItemInput.addEventListener('click', (e) => {
-                const domainCheckbox = e.target;
-                if (domainCheckbox.value == domainInput.value) {
-                    //domainCheckbox.checked = false
-                    //domainInput.value = "";
-                    domainCheckbox.checked = true;
-                } else {
-                    domainInput.value = domainCheckbox.value;
-                    setCookie("selectedDomain", domainInput.value);
-                    triggerDomainInputChangeEvent();
-                }
+            domainItemDiv.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const domainCheckbox = document.getElementById(domain.domain_id) ;
+                    domainCheckbox.checked = true
+                    setCookie("selectedDomain", domainCheckbox.id);
+                    handleDomainChoice(domainCheckbox.id)
             });
 
             domainItemLabel.setAttribute('for', domain.domain)
@@ -584,7 +581,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             domainItemLabel.innerHTML = domain.domain;
             domainItemLabel.classList.add("form-check-label");
 
-            domainItemDiv.appendChild(domainItemInput);
+            domainItemDiv.appendChild(domainItemCheckbox);
             domainItemDiv.appendChild(domainItemLabel);
             domainItemDiv.classList.add("form-check");
             domainRadiosList.appendChild(domainItemDiv);
@@ -723,10 +720,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    async function handleDomainChoice(domain) {
-        if (domain != "" && domain != undefined) {
+    async function handleDomainChoice(domainId) {
+        if (domainId != "" && domainId != undefined) {
             spinnerContainer.style.display = "block";
-            Promise.all([getPinData(domain), getTagData(domain), getGroupData(domain), getUrlData(domain)])
+            Promise.all([getPinData(domainId), getTagData(domainId), getGroupData(domainId), getUrlData(domainId)])
                 .then(async (results) => {
                     try {
                         // Handle the results of both promises
@@ -748,7 +745,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     }
                 })
                 .then(() => {
-                    setCookie("selectedDomain", domain); //,30)
+                    setCookie("selectedDomain", domainId); //,30)
                 })
                 .then(() => {
                     const clickEvent = new Event('click', {
@@ -799,12 +796,13 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         })
         .then(() => {
-            domainInput.addEventListener("change",
-                async () => {
-                    const domain = domainInput.value;
-                    await handleDomainChoice(domain)
+       /*     domainInput.addEventListener("click",
+                async (e) => {
+                    const domainId = e.target.id;
+                    await handleDomainChoice(domainId)
                 }
             )
+        */
             // événement sur le changement du filtre sur l'url
             siteInput.addEventListener("change",
                 async () => {
@@ -813,11 +811,13 @@ document.addEventListener("DOMContentLoaded", async function () {
             )
             // Get all checked checkboxes
             //document.getElementById("checkboxes_container").addEventListener("change", filterPinsOr);
+            /*
             tagCheckboxesContainer.addEventListener("change",
                 async () => {
                     //await filterPinsAnd();
                     await filterPins();
                 });
+            */
 
             urlCheckboxesContainer.addEventListener("change",
                 async () => {
@@ -833,9 +833,11 @@ document.addEventListener("DOMContentLoaded", async function () {
             )
 
         })
+        /*
         .then(() => {
             triggerDomainInputChangeEvent()
         })
+         */
         .catch((error) => {
             // Handle any errors that occurred in any of the promises
             console.error("An error occurred:", error);
@@ -873,7 +875,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     function checkPinUrlIdInSelectedUrls(pin) {
-        const site = pin.getAttribute("site")
+        const siteId = pin.getAttribute("site_id")
         const checkedCheckboxes = Array.from(document.querySelectorAll(".form-check-input-url[type=checkbox]:checked"));
         const checkedCheckboxesValues = checkedCheckboxes.map((e) => {
             return e.id
@@ -881,7 +883,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (checkedCheckboxesValues.length == 0) {
             return true
         }
-        return (checkedCheckboxesValues.includes(site));
     }
 
     function checkPinRating(pin) {
@@ -1168,7 +1169,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const allPins = document.querySelectorAll('.pin:not(#pin_0)');
         const allPinsArray = [...allPins];
         const allPinsUrls = allPinsArray.map((pin) => {
-            return pin.getAttribute("site");
+            return pin.getAttribute("site_id");
         });
 
         // pour les urls
