@@ -57,7 +57,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
         try {
-            //const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins", {
             const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + pinId, {
                 method: method,
                 headers: {
@@ -82,7 +81,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
         try {
-            //const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins", {
             const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + pinId, {
                 method: method,
                 headers: {
@@ -110,7 +108,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
         try {
-            //const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins", {
             const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + pinId, {
                 method: method,
                 headers: {
@@ -134,7 +131,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
         try {
-            //const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins", {
             const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Sites/" + siteId, {
                 method: 'PATCH',
                 headers: {
@@ -402,10 +398,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     //** PIN DATA ******************************
-    async function getPinData(domain) {
+    async function getPinData(domainId) {
         try {
-            //const apiUrl = `https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins?filterByFormula=` + encodeURIComponent(`AND({domain_name}="` + domain + `")`);
-            const apiUrl = `https://pinboard-hqnx.onrender.com/api/domain/` + domain + `/pins`;
+            const apiUrl = `https://pinboard-hqnx.onrender.com/api/domain/` + domainId + `/pins`;
 
             const response = await fetch(apiUrl, {headers});
             //const response = await fetch("https://pinboard-hqnx.onrender.com/api/pins", {headers});
@@ -608,9 +603,9 @@ document.addEventListener("DOMContentLoaded", async function () {
             urlItemInput.classList.add("form-check-input");
             urlItemInput.classList.add("form-check-input-url");
             urlItemInput.type = "checkbox";
-            urlItemInput.id = url.id;
-            urlItemInput.name = url.url;
-            urlItemInput.value = url.url;
+            //urlItemInput.id = url.id;
+            //urlItemInput.name = url.url;
+            //urlItemInput.value = url.url;
 
             const urlItemLabel = document.createElement("label");
             urlItemLabel.setAttribute('for', url.url);
@@ -624,7 +619,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             const urlItemFavorite = document.createElement("span");
             const urlItemFavoriteClass = (url.rating == 1 ? "bi-star-fill" : "bi-dot")
             urlItemFavorite.classList.add("url-favorite", "dot", "bi", urlItemFavoriteClass);
-            urlItemFavorite.id = url.id;
+            //urlItemFavorite.id = url.id;
             urlItemFavorite.setAttribute("rating", url.rating);
             urlItemFavorite.addEventListener("click", (e) => {
                 console.log("test test ------------------")
@@ -636,7 +631,8 @@ document.addEventListener("DOMContentLoaded", async function () {
                 updateSiteRating(url.id, newRating)
             })
 
-            const urlItemDiv = document.createElement("li");
+            const urlItemDiv = document.createElement("li")
+            urlItemDiv.id = url.id;
             urlItemDiv.appendChild(urlItemInput);
             urlItemDiv.appendChild(urlItemFavorite);
             urlItemDiv.appendChild(urlItemLabel);
@@ -878,11 +874,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         const siteId = pin.getAttribute("site_id")
         const checkedCheckboxes = Array.from(document.querySelectorAll(".form-check-input-url[type=checkbox]:checked"));
         const checkedCheckboxesValues = checkedCheckboxes.map((e) => {
-            return e.id
+            return e.parentElement.id
         })
-        if (checkedCheckboxesValues.length == 0) {
-            return true
-        }
+        return checkedCheckboxesValues.length==0 || checkedCheckboxesValues.includes(siteId)
     }
 
     function checkPinRating(pin) {
@@ -1173,26 +1167,26 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
 
         // pour les urls
-        const allPinsUrlsCount = allPinsUrls.reduce((acc, url) => {
+        const allPinsUrlsCount = allPinsUrls.reduce((acc, site_id) => {
             //const id = objet.id;
-            if (!acc[url]) {
-                acc[url] = 1; // Initialisez le compteur à 1 si c'est la première occurrence
+            if (!acc[site_id]) {
+                acc[site_id] = 1; // Initialisez le compteur à 1 si c'est la première occurrence
             } else {
-                acc[url]++; // Incrémentez le compteur si le nom existe déjà
+                acc[site_id]++; // Incrémentez le compteur si le nom existe déjà
             }
             return acc;
         }, {});
 
-        const allPinsCountByUrl = Object.entries(allPinsUrlsCount).map(([url, count]) => ({url, count}));
+        const allPinsCountByUrl = Object.entries(allPinsUrlsCount).map(([site_id, count]) => ({site_id, count}));
         //
         const urlCheckboxLi = document.querySelectorAll("#url_checkboxes_list li");
         const urlCheckboxesLiArray = [...urlCheckboxLi];
         urlCheckboxesLiArray.forEach(checkbox => {
             const urlCheckboxLiLabel = checkbox.querySelector(".form-check-label")
             const urlCheckboxLiLabelCount = checkbox.querySelector(".urlCount")
-            const urlId = checkbox.querySelector(".form-check-input-url").id;
+            const urlId = checkbox.id;
             //const urlNbOccurrences = allPinsCountByUrl.find(element => element.url === urlCheckboxLiLabel.getAttribute("for"));
-            const urlNbOccurrences = allPinsCountByUrl.find(element => element.url === urlId);
+            const urlNbOccurrences = allPinsCountByUrl.find(element => element.site_id === urlId);
             if (urlNbOccurrences == undefined) {
                 urlCheckboxLiLabel.classList.add("urlCount0");
                 urlCheckboxLiLabelCount.textContent = "";
@@ -1280,7 +1274,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         let filterIsActive = e.currentTarget.classList.contains("selected");
         await toggleClass(e.currentTarget,"not_selected", "selected")
         await toggleClass(star, "bi-star-fill", "bi-star")
-        await filterUrls(filterIsActive) ;
+        //await filterUrls(filterIsActive) ;
         await filterPins();
     })
 
