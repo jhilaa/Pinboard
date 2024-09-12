@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     async function updateSiteRating(siteId, rating) {
         let postData = {
             "fields": {
-                "rating": rating
+                "site_rating": rating.toString()
             }
         }
         try {
@@ -311,6 +311,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
             const tags = clone.querySelector(".pin_body .tags");
+			if (pinTagsData != undefined && pinTagsData.length > 0) {
             for (const tag of pinTagsData) {
                 //
                 const newSpan = document.createElement("span");
@@ -320,6 +321,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 newSpan.classList.add("tag");
                 tags.appendChild(newSpan);
             }
+			}
 
             const selected_checkbox = clone.querySelector(".pin_header .selection_input");
             selected_checkbox.addEventListener("click", (e) => {
@@ -642,18 +644,21 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    function createGroupTree(groupData) {
-        function trouverFils(array, parent) {
+    function createGroupTree(groupData, selectedGroups) {
+
+        function trouverFils(array, groupId) {
             let children = [];
-            if (Array.isArray(array)) {
+            if (Array.isArray(array) && array.length > 0 && groupId) {
                 array.forEach(record => {
                     const fields = record.fields;
-                    if (Array.isArray(fields.group) && fields.group.length > 0) {
-                        if (parent == fields.group[0]) {
+                    if (fields.parent_group_id && fields.parent_group_id.length > 0) {
+					if (groupId == fields.parent_group_id[0]) {
                             children.push({
                                 id: record.id,
                                 text: fields.name,
-                                children: trouverFils(array, record.id)
+                                //name: "groups",
+                                children: trouverFils(array, record.id),
+                                checked: ((selectedGroups!= undefined && selectedGroups.length >0) ?  selectedGroups.includes(record.id) : false)
                             });
                         }
                     }
@@ -663,7 +668,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
 
         try {
-            let result = trouverFils(groupData.records, "recqhM5UDTNnUVvaL");
+			if (groupData ) {
+			const racine = groupData.records.filter((group) => group.fields.parent_group_id == undefined )
+            let result = trouverFils(groupData.records, racine[0].id);
             // Exemple d'utilisation avec les données fournies
 
             groupCheckboxesList.innerHTML = "";
@@ -692,6 +699,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             treejsLabels.forEach((treejsLabel) => {
                 treejsLabel.setAttribute("label", treejsLabel.innerHTML);
             })
+			}
         } catch (error) {
             console.error("Error fetching or processing data:", error);
         }
@@ -807,13 +815,11 @@ document.addEventListener("DOMContentLoaded", async function () {
             )
             // Get all checked checkboxes
             //document.getElementById("checkboxes_container").addEventListener("change", filterPinsOr);
-            /*
             tagCheckboxesContainer.addEventListener("change",
                 async () => {
                     //await filterPinsAnd();
                     await filterPins();
                 });
-            */
 
             urlCheckboxesContainer.addEventListener("change",
                 async () => {
@@ -908,10 +914,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         const url = pin.querySelector(".url").textContent;
         const description = pin.querySelector(".description").textContent;
         let tagsLabel = "";
+		if (pin.querySelector(".tag") != undefined && pin.querySelector(".tag") != null) {
         const tags = Array.from(pin.querySelector(".tag"))
-        tags.forEach((tag) => {
+        if (tags != undefined && tags.length > 0) {
+		tags.forEach((tag) => {
             tagsLabel.concat(tag.name);
         })
+		}}
         const concatLabels = (name.concat(url, description, tagsLabel)).toLowerCase();
 
         if (textInputValue == "" || textInputValue == undefined || concatLabels == "") {
@@ -942,7 +951,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const selectedGroupsId = treeCheckedElement.map(e => {
             return e.nodeId
         });
-        const pinGroupsAttribute = pin.getAttribute("groups");
+        const pinGroupsAttribute = pin.getAttribute("groups_id");
 
         if (selectedGroupsId.length != 0 && pinGroupsAttribute != undefined) {
             const pinGroupsAttributeArray = pinGroupsAttribute.split(",");
@@ -1010,7 +1019,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const visiblePins = document.querySelectorAll('.pin.display_block');
         let visiblePinsGroupsId = [];
         visiblePins.forEach(pin => {
-            const pinGroupAttribute = pin.getAttribute("groups");
+            const pinGroupAttribute = pin.getAttribute("groups_id");
             if (pinGroupAttribute != undefined && pinGroupAttribute != "") {
                 const pinGroupIds = pinGroupAttribute.split(",");
                 visiblePinsGroupsId = visiblePinsGroupsId.concat(pinGroupIds);
@@ -1160,7 +1169,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     function countPinsByUrl() {
         //--
-        const allPins = document.querySelectorAll('.pin:not(#pin_0)');
+        const allPins = document.querySelectorAll('.pin.display_block:not(#pin_0)');
         const allPinsArray = [...allPins];
         const allPinsUrls = allPinsArray.map((pin) => {
             return pin.getAttribute("site_id");
@@ -1274,7 +1283,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         let filterIsActive = e.currentTarget.classList.contains("selected");
         await toggleClass(e.currentTarget,"not_selected", "selected")
         await toggleClass(star, "bi-star-fill", "bi-star")
-        //await filterUrls(filterIsActive) ;
+        await filterUrls(filterIsActive) ;
         await filterPins();
     })
 
