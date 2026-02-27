@@ -1,9 +1,7 @@
 document.addEventListener("DOMContentLoaded", async function () {
-    const token = "pateoiLGxeeOa1bbO.7d97dd01a0d5282f7e4d3b5fff9c9e10d2023d3a34b1811e1152a97182c2238d"; // Replace with your Bearer Token
-    const headers = new Headers({
-        "Authorization": `Bearer ${token}`,
+	const headers = new Headers({
+       
     });
-
 
     //** on floute l'arrière-plan pendant les requêtes
     const spinnerContainer = document.getElementById("spinnerContainer"); // Define spinnerContainer here
@@ -29,7 +27,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         const expirationDate = new Date();
         expirationDate.setDate(expirationDate.getDate() + 7);
         //document.cookie = cookieName+"="+cookieValue+"; expires=Fri, 31 Dec 9999 23:59:59 GMT; Path=/";
+		console.log("cookieName :" +cookieName);
+		console.log("cookieValue :" +cookieValue);
         document.cookie = cookieName + "=" + cookieValue + "; Path=/";
+		alert(document.cookie)
     }
 
     function getCookie(cookieName) {
@@ -60,7 +61,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + pinId, {
                 method: method,
                 headers: {
-                    "Authorization": " Bearer " + token,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(postData)
@@ -84,7 +84,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + pinId, {
                 method: method,
                 headers: {
-                    "Authorization": " Bearer " + token,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(postData)
@@ -111,7 +110,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + pinId, {
                 method: method,
                 headers: {
-                    "Authorization": " Bearer " + token,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(postData)
@@ -134,7 +132,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Sites/" + siteId, {
                 method: 'PATCH',
                 headers: {
-                    "Authorization": " Bearer " + token,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(postData)
@@ -435,7 +432,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     //** TAG DATA ******************************
     async function getTagData(domain) {
         try {
-            //const apiUrl = `https://pinboard-hqnx.onrender.com/api/tag/all`;
             const apiUrl = `https://pinboard-hqnx.onrender.com/api/domain/` + domain + `/tags`;
 
             const response = await fetch(apiUrl, {headers});
@@ -537,18 +533,18 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    async function createDomainRadios(domainData, domain) {
+    async function createDomainRadios(domainData, domainCookie) {
         const domainArray = domainData.records.map((record) => {
             return {domain_id:record.id, domain:record.fields.name}
         })
-        const sortedDomains = new Set(domainArray.sort((a, b) => {
+        const sortedDomains = domainArray.sort((a, b) => {
             const nameA = a.domain.toLowerCase();
             const nameB = b.domain.toLowerCase();
 
             if (nameA < nameB) return -1;
             if (nameA > nameB) return 1;
             return 0;
-        }));
+        });
 
         for (const domain of sortedDomains) {
             const domainItemDiv = document.createElement("div");
@@ -560,10 +556,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             domainItemCheckbox.id = domain.domain_id;
             domainItemCheckbox.name = "domain";
             domainItemCheckbox.value = domain.domain;
-            if (domain == domainCookie) {
-                domainItemCheckbox.checked = true;
-            }
-            handleDomainChoice(undefined);
 
             domainItemDiv.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -582,6 +574,12 @@ document.addEventListener("DOMContentLoaded", async function () {
             domainItemDiv.appendChild(domainItemLabel);
             domainItemDiv.classList.add("form-check");
             domainRadiosList.appendChild(domainItemDiv);
+			
+			if (domain.domain_id == domainCookie) {
+                domainItemCheckbox.checked = true;
+				handleDomainChoice(domainCookie);
+            }
+            
         }
     }
 
@@ -746,9 +744,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                         console.error("Error fetching or processing data:", error);
                     } finally {
                         spinnerContainer.style.display = "none";
+						console.log("setCookie selectedDomain = "+domainId);
+						setCookie("selectedDomain", domainId); //,30)
                     }
                 })
                 .then(() => {
+					console.log("setCookie selectedDomain = "+domainId)
                     setCookie("selectedDomain", domainId); //,30)
                 })
                 .then(() => {
@@ -764,6 +765,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 cancelable: true // Permet d'annuler l'événement si nécessaire.
             });
             domainLinkToggle.dispatchEvent(clickEvent);
+			console.log("setCookie selectedDomain = null")
             setCookie("selectedDomain", "")
         }
     }
@@ -902,8 +904,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (ratingOperatorValue == 4) {
             return (pinRating <= ratingValue)
         }
-        if (ratingOperatorInput == 5) {
-            return (pinRating < ratingValueInput)
+        if (ratingOperatorValue == 5) {
+            return (pinRating < ratingValue)
         }
     }
 
@@ -915,10 +917,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         const description = pin.querySelector(".description").textContent;
         let tagsLabel = "";
 		if (pin.querySelector(".tag") != undefined && pin.querySelector(".tag") != null) {
-        const tags = Array.from(pin.querySelector(".tag"))
+        const tags = Array.from(pin.querySelectorAll(".tag"))
         if (tags != undefined && tags.length > 0) {
 		tags.forEach((tag) => {
-            tagsLabel.concat(tag.name);
+            tagsLabel+=tag.name+";";
         })
 		}}
         const concatLabels = (name.concat(url, description, tagsLabel)).toLowerCase();
