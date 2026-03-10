@@ -3,3 +3,6 @@
 ./http-server.bat
 ./temp/
 temp/
+.readme.dev
+env.js
+*.env

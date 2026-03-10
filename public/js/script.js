@@ -30,7 +30,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 		console.log("cookieName :" +cookieName);
 		console.log("cookieValue :" +cookieValue);
         document.cookie = cookieName + "=" + cookieValue + "; Path=/";
-		alert(document.cookie)
     }
 
     function getCookie(cookieName) {
@@ -49,52 +48,33 @@ document.addEventListener("DOMContentLoaded", async function () {
         return "";
     }
 
-    //** click sur les étoiles
-    async function updateRating(pinId, rating) {
-        let method = "PATCH";
-        let postData = {
-            "fields": {
-                "rating": rating.toString()
-            }
-        }
-        try {
-            const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + pinId, {
-                method: method,
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(postData)
-            });
-            const responseData = await response.json()
-            console.log("-- responseData---------")
-            console.log(responseData)
-        } catch (error) {
-            console.error("Error making POST request:", error);
-        }
-    }
 
-    async function updateStatus(pinId, status) {
-        let method = "PATCH";
-        let postData = {
-            "fields": {
-                "status": status.toString()
-            }
-        }
+
+	//=================================
+	//** URL DATA ******************************
+    async function patchData(scope, id, data) {
         try {
-            const response = await fetch("https://api.airtable.com/v0/app7zNJoX11DY99UA/Pins/" + pinId, {
-                method: method,
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(postData)
-            });
-            const responseData = await response.json()
-            console.log("-- responseData 2 ------------")
-            console.log(responseData)
+            const apiUrl = "https://pinboard-hqnx.onrender.com/api/"+scope;
+            const response = await fetch(apiUrl, 
+							{	
+							   method: "PATCH", 
+							   headers: {"Content-Type": "application/json"},
+							   body: JSON.stringify({"id": id,  "data": data })
+							}
+			);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch data. Status: ${response.status}`);
+            }
+            const response_json = await response.json();
+            return response_json;
+            //grid.init(data);
         } catch (error) {
-            console.error("Error making POST request:", error);
+            console.error("Error fetching or processing data:", error);
         }
     }
+	
+
+    
 
     async function updateSelected(pinId, selected) {
         console.log("selected ---------------");
@@ -206,6 +186,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 }
             })
 
+            // status
             const pin_status = clone.querySelector(".pin_status")
             if (record.fields.status == undefined) {
                 pin_status.classList.add("btn-green");
@@ -238,17 +219,22 @@ document.addEventListener("DOMContentLoaded", async function () {
 
                 const spinnerPinContainerElement = pinElement.querySelector(".spinnerPinContainer");
                 spinnerPinContainerElement.style.display = "flex";
-                await updateStatus(pinElement.id, new_status);
+				// patch en base
+                await patchData("pin",pinElement.id, {"status" : new_status.toString()});
                 spinnerPinContainerElement.style.display = "none";
             })
-
+			
+			
+			// selected
             const pin_selected = clone.querySelector(".selection_input")
             pin_selected.addEventListener("click", async (e) => {
                 e.stopPropagation();
                 const pinElement = e.target.closest(".pin");
                 const spinnerPinContainerElement = pinElement.querySelector(".spinnerPinContainer");
                 spinnerPinContainerElement.style.display = "flex";
-                await updateSelected(pinElement.id, pin_selected.checked);
+				
+				// patch en base
+				patchData("pin", pinElement.id, {"selected" : pin_selected.checked})
                 spinnerPinContainerElement.style.display = "none";
             })
 
@@ -259,7 +245,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 star.classList.remove("display_none");
             }
 
-
+			// globe
             const globe = clone.querySelector(".bi-globe");
             globe.addEventListener("click", (e) => {
                 const pinElement = e.target.closest(".pin");
@@ -294,11 +280,13 @@ document.addEventListener("DOMContentLoaded", async function () {
                     clone.setAttribute("rating", new_value);
                     updateStarsDisplay(pin_rating_stars, old_value, new_value);
 
-                    //const spinnerPinContainerElement = e.target.closest(".spinnerPinContainer");
                     const pinElement = e.target.closest(".pin");
                     const spinnerPinContainerElement = pinElement.querySelector(".spinnerPinContainer");
-                    spinnerPinContainerElement.style.display = "flex";
-                    await updateRating(pinElement.id, new_value);
+ 
+				    // patch en base
+					console.log ("pin : " + pinElement.id)
+					console.log ("rating : " + new_value) 
+                    await patchData("pin",pinElement.id, {"rating" : new_value.toString()});
                     spinnerPinContainerElement.style.display = "none";
 
                 });
@@ -428,6 +416,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         }
     }
+	
 
     //** TAG DATA ******************************
     async function getTagData(domain) {
@@ -495,6 +484,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             console.error("Error fetching or processing data:", error);
         }
     }
+	
+
 
     //** FIN DATA **********************
 
@@ -628,7 +619,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 e.target.setAttribute("rating", newRating)
                 toggleClass(e.target, "bi-star-fill", "bi-dot")
                 // updte en base
-                updateSiteRating(url.id, newRating)
+                // updateSiteRating(url.id, newRating)
             })
 
             const urlItemDiv = document.createElement("li")
